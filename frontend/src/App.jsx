@@ -1,35 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [hoursData, setHoursData] = useState(null);
+  const [view, setView] = useState("daily"); // default view
+
+  useEffect(() => {
+    const fetchHours = async () => {
+      try {
+        const res = await fetch("https://time-tracking-fullstack-mern.vercel.app/api/hours");
+        const data = await res.json();
+        setHoursData(data[0]); // first item
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchHours();
+  }, []);
+
+  if (!hoursData) return <p>Loading...</p>;
+
+  const { user, time } = hoursData;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="container">
+      {/* LEFT SIDE BUTTONS */}
+      <aside className="sidebar">
+        <h2>{user}</h2>
+        <button onClick={() => setView("daily")} className={view === "daily" ? "active" : ""}>
+          Daily
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+        <button onClick={() => setView("weekly")} className={view === "weekly" ? "active" : ""}>
+          Weekly
+        </button>
+        <button onClick={() => setView("monthly")} className={view === "monthly" ? "active" : ""}>
+          Monthly
+        </button>
+      </aside>
+
+      {/* RIGHT SIDE DISPLAY */}
+      <main className="content">
+        <h2>{view.charAt(0).toUpperCase() + view.slice(1)}</h2>
+        <ul>
+          {time[view].map((item) => (
+            <li key={item._id}>
+              <strong>{item.name}</strong>: {item.hours} {" "}
+              <span>(Last Week: {item.lastWeek})</span>
+            </li>
+          ))}
+        </ul>
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
