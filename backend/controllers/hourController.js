@@ -31,26 +31,27 @@ const getHour = async (req, res) => {
 
 // create a new hour
 const createHour = async (req, res) => {
-  const { title } = req.body
+  const { user, time } = req.body;
 
-  let emptyFields = []
+  let emptyFields = [];
 
-  if (!title) {
-    emptyFields.push('title')
-  }
+  if (!user) emptyFields.push('user');
+  if (!time) emptyFields.push('time');
 
   if (emptyFields.length > 0) {
-    return res.status(400).json({ error: 'Please fill in all fields', emptyFields })
+    return res.status(400).json({
+      error: 'Please fill in all fields',
+      emptyFields
+    });
   }
 
-  // add doc to db
   try {
-    const hour = await Hour.create({ title })
-    res.status(200).json(hour)
+    const hour = await Hour.create({ user, time });
+    res.status(200).json(hour);
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    res.status(400).json({ error: error.message });
   }
-}
+};
 
 // delete a hour
 const deleteHour = async (req, res) => {
